@@ -1,5 +1,6 @@
-**It is my first protofilo project and it covers all the Blockchain Solidity programming basics used to make a Smart Contract.**
+**It is my first protofilo project and it covers all Blockchain Solidity programming basics.**
 
-(This is a **digital land record registration project** and also a **Marketplace** where a buyer and seller register themselves
-and after verification from a Land Inspector or admin can sell or purchase land property without any third party involvement securely with the help of blockchain.)
+Description:
+(This is a **Smart Contract of land Registration** and also a **Marketplace** where a buyer and seller register themselves
+and after verification from a Land Inspector or Admin can sell or purchase land property without any third party involvement securely with the help of blockchain.)
 
