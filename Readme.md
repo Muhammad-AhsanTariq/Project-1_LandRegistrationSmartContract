@@ -1,4 +1,4 @@
-**It is my first protofilo project and it covers all Blockchain Solidity programming basics.**
+**It is my first protofilo project based on Blockchain Solidity programming.**
 
 **Description:**
 (This is a **Smart Contract of land Registration** and also a **Marketplace** where a buyer and seller register themselves
