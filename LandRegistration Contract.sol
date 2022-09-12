@@ -37,8 +37,7 @@ pragma solidity >=0.7.0 <0.9.0;
         string Designation;
     }
 
-    
-
+  
     //key value pairs
     mapping(uint => Landreg) private Land;
     mapping(uint => LandInspector) public InspectorMapping;
@@ -73,12 +72,13 @@ pragma solidity >=0.7.0 <0.9.0;
        require( _landInspector == msg.sender , "LandInspector Restricted");
        _;
     }
+    
     uint inspector;
+    
     function addlandInspector(address _id,string memory _name, uint _age, string memory _designation) public onlyme{
 
       InspectorMapping[inspector] = LandInspector(_id,_name, _age, _designation);
     }
-    
     
     function landInspector(address) private view returns (bool) {
         if(msg.sender==_landInspector){
@@ -87,21 +87,22 @@ pragma solidity >=0.7.0 <0.9.0;
             return false;
         }
     }
+    
     // (SELLER)   
     // Registration of seller
+    
     uint private sellersCount;
     function registerSeller(string memory _name, uint _age, string memory _city, uint _cnic, string memory _email) public {
         //require that Seller is not already registered
         require(!RegisteredAddressMapping[msg.sender]);
 
-        RegisteredAddressMapping[msg.sender] = true;
+        RegisteredAddressMapping[msg.sender] = true; // it will register player
         RegisteredSellerMapping[msg.sender] = true ;
         sellersCount++;
         SellerMapping[msg.sender] = Seller(msg.sender,_name, _age, _city,_cnic, _email);
         sellers.push(msg.sender);
         emit Registration(msg.sender);
     }
-
     
     function verifySeller(address _sellerId) public{
         require(landInspector(msg.sender));
@@ -116,6 +117,7 @@ pragma solidity >=0.7.0 <0.9.0;
         SellerRejection[_sellerId] = true;
         emit Rejected(_sellerId);
     }
+    
     function SellerisVerified(address _id) public view returns(bool) {
         if(SellerVerification[_id]){
             return true;
@@ -123,22 +125,25 @@ pragma solidity >=0.7.0 <0.9.0;
         else{return false;} 
         
     }
+    
     function isSeller(address _id) public view returns (bool) {
         if( SellerVerification[_id]){
             return true;
         }
         else{return false;}
     }
+
     //Add Land
     uint private landsCount;
     function addLand(uint _landId,uint _area, string memory _city,string memory _state, uint _landPrice, uint _propertyPID) public {
         require((isSeller(msg.sender)));
         landsCount++;
+
         Land[_landId] = Landreg(_landId,_area, _city, _state,_landPrice,_propertyPID);
-        LandOwner[landsCount] = msg.sender;
         LandOwner[_landId]=msg.sender;
         
     }
+    
     function verifyLand(uint _landId) public{
         require(landInspector(msg.sender));
 
@@ -151,6 +156,7 @@ pragma solidity >=0.7.0 <0.9.0;
         }
         else {return false;}
     }
+    
     function updateSeller(string memory _name, uint _age, string memory _city, uint _cnic, string memory _email) public {
         //require that Seller is already registered
         require(RegisteredAddressMapping[msg.sender] && (SellerMapping[msg.sender].Id == msg.sender));
@@ -165,6 +171,7 @@ pragma solidity >=0.7.0 <0.9.0;
     function getArea(uint _landId) public view returns (uint) {
         return  Land[_landId].Area;
     }
+    
     function getLandCity(uint _landId) public view returns (string memory) {
         return Land[_landId].City;
     }
@@ -193,7 +200,6 @@ pragma solidity >=0.7.0 <0.9.0;
         emit Registration(msg.sender);
     }
     
-
     function verifyBuyer(address _buyerId) public{
         require(landInspector(msg.sender));
 
@@ -207,12 +213,14 @@ pragma solidity >=0.7.0 <0.9.0;
         BuyerRejection[_buyerId] = true;
         emit Rejected(_buyerId);
     }
+    
     function BuyerisVerified(address _id) public view returns (bool) {
         if(BuyerVerification[_id]){
             return true;
         }
         else{return false;}
     }
+    
     function updateBuyer(string memory _name,uint _age, string memory _city,uint _cnic, string memory _email) public {
         //require that Buyer is already registered
         require(RegisteredAddressMapping[msg.sender] && (BuyerMapping[msg.sender].Id == msg.sender));
@@ -223,6 +231,7 @@ pragma solidity >=0.7.0 <0.9.0;
         BuyerMapping[msg.sender].CNIC = _cnic;
         BuyerMapping[msg.sender].Email = _email;   
     }
+    
     function isBuyer(address _id) public view returns (bool) {
         if(BuyerVerification[_id]){
             return true;
@@ -246,22 +255,17 @@ pragma solidity >=0.7.0 <0.9.0;
 
 
     // (Land Buy and Transfer)
-    // (First buyer do landpayment than buy land to become landowner by entering landid and its own addres.)
-    
-    function LandPayment( uint _landId,address payable _Id) public payable {
-       
+   
+    function BuyLand(uint _landId)  public payable{  
+        PaymentReceived[_landId] = true;  
         
-        PaymentReceived[_landId] = true;
-        _Id.transfer(msg.value);
-         require(_Id==SellerMapping[_Id].Id);
-        require(msg.value==Land[_landId].Landprice);
-    }
-    function BuyLand(uint _landId)  public{
-         require(PaymentReceived[_landId]);
-        require(BuyerMapping[msg.sender].Id == msg.sender);
-       
+        require(msg.value==Land[_landId].Landprice , "Price Issue)");
+         payable (LandOwner[_landId]).transfer(msg.value);
+        require(BuyerMapping[msg.sender].Id == msg.sender ,"Not registered Buyer");
+        require(PaymentReceived[_landId], "not paid");
         LandOwner[_landId] = msg.sender;
     }
+
     function isLandPaid(uint _landId) public view returns (bool) {
         if(PaymentReceived[_landId]){
             return true;
@@ -269,11 +273,13 @@ pragma solidity >=0.7.0 <0.9.0;
         else {return false;
         }
     }
+    
     // (Seller can also transfer land ownership to whom he want)
     
     function LandOwnershipTransfer(uint _landId, address _newOwner) public{
-         require(SellerMapping[msg.sender].Id == msg.sender);{
+         require((SellerMapping[msg.sender].Id == msg.sender) , "only seller allowed");{
          LandOwner[_landId] = _newOwner;
          }
     }
+    
 }
