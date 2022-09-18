@@ -37,6 +37,14 @@ pragma solidity >=0.7.0 <0.9.0;
         string Designation;
     }
 
+    uint inspector;
+    uint public sellersCount;
+    uint public landsCount;
+    uint public buyersCount;
+    address[] private sellers;
+    address[] private buyers;
+    address public _landInspector;
+
   
     //key value pairs
     mapping(uint => Landreg) private Land;
@@ -54,16 +62,9 @@ pragma solidity >=0.7.0 <0.9.0;
     mapping(uint => address) private LandOwner;
     mapping(uint => bool) private PaymentReceived;
 
-    
-    address[] private sellers;
-    address[] private buyers;
-
     event Registration(address _registrationId);
     event Verified(address _id);
     event Rejected(address _id);
-
-   //(LandInspector)
-   address public _landInspector;
      
     constructor() {
         _landInspector = msg.sender ;
@@ -73,7 +74,6 @@ pragma solidity >=0.7.0 <0.9.0;
        _;
     }
     
-    uint inspector;
     
     function addlandInspector(address _id,string memory _name, uint _age, string memory _designation) public onlyme{
 
@@ -91,7 +91,6 @@ pragma solidity >=0.7.0 <0.9.0;
     // (SELLER)   
     // Registration of seller
     
-    uint private sellersCount;
     function registerSeller(string memory _name, uint _age, string memory _city, uint _cnic, string memory _email) public {
         //require that Seller is not already registered
         require(!RegisteredAddressMapping[msg.sender]);
@@ -134,7 +133,7 @@ pragma solidity >=0.7.0 <0.9.0;
     }
 
     //Add Land
-    uint private landsCount;
+    
     function addLand(uint _landId,uint _area, string memory _city,string memory _state, uint _landPrice, uint _propertyPID) public {
         require((isSeller(msg.sender)));
         landsCount++;
@@ -186,7 +185,7 @@ pragma solidity >=0.7.0 <0.9.0;
 
     // (BUYER)
     // Registration of Buyer
-    uint private buyersCount;
+   
     function registerBuyer(string memory _name, uint _age, string memory _city, uint _cnic, string memory _email) public {
         //require that Buyer is not already registered
         require(!RegisteredAddressMapping[msg.sender]);
@@ -253,7 +252,6 @@ pragma solidity >=0.7.0 <0.9.0;
         return (BuyerMapping[i].Name,BuyerMapping[i].Age , BuyerMapping[i].City, BuyerMapping[i].CNIC, BuyerMapping[i].Email);
     }
 
-
     // (Land Buy and Transfer)
    
     function BuyLand(uint _landId)  public payable{  
@@ -274,12 +272,13 @@ pragma solidity >=0.7.0 <0.9.0;
         }
     }
     
-    // (Seller can also transfer land ownership to whom he want)
+    // (LandOwner can also transfer land ownership to whom he want)
     
     function LandOwnershipTransfer(uint _landId, address _newOwner) public{
-         require((SellerMapping[msg.sender].Id == msg.sender) , "only seller allowed");{
+         require(( LandOwner[_landId] == msg.sender) , "only LandOwner allowed");
+         {
          LandOwner[_landId] = _newOwner;
          }
-    }
+     }
     
-}
+    }
